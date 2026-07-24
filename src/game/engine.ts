@@ -1,4 +1,4 @@
-import type { GameState, World, Obstacle, TapResult } from "./types";
+import type { GameState, World, Obstacle, ObstacleKind, TapResult } from "./types";
 import {
   FALL_DURATION,
   FALL_GRAVITY,
@@ -11,7 +11,7 @@ import { hideChanceForLevel } from "./difficulty";
 import { isTapOnPoop, isPoopCovered } from "./collision";
 import { applyHit, applyMiss } from "./scoring";
 
-const OBSTACLE_EMOJIS = ["🌳", "📦", "🪨", "🌵", "🛢️"];
+const OBSTACLE_KINDS: ObstacleKind[] = ["bush", "stone", "house"];
 
 /**
  * Deko-Objekte, hinter denen sich der Kackhaufen verstecken kann.
@@ -36,7 +36,7 @@ export function makeObstacles(level: number, world: World): Obstacle[] {
       y: world.height - GROUND_HEIGHT - h + 40,
       width: w,
       height: h,
-      emoji: OBSTACLE_EMOJIS[i % OBSTACLE_EMOJIS.length],
+      kind: OBSTACLE_KINDS[i % OBSTACLE_KINDS.length],
     });
   }
   return obstacles;

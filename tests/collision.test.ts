@@ -37,7 +37,7 @@ describe("collision", () => {
       y: 500,
       width: 160,
       height: 220,
-      emoji: "🌳",
+      kind: "bush",
     };
     expect(isPoopCovered(p, [obstacle])).toBe(true);
   });
@@ -49,7 +49,7 @@ describe("collision", () => {
       y: 500,
       width: 120,
       height: 220,
-      emoji: "🌳",
+      kind: "bush",
     };
     expect(isPoopCovered(p, [obstacle])).toBe(false);
   });

@@ -57,7 +57,7 @@ describe("engine", () => {
       y: s.poop.y - s.poop.size,
       width: s.poop.size,
       height: s.poop.size * 1.5,
-      emoji: "🌳",
+      kind: "bush",
     };
     s.obstacles = [cover];
     const res = handleTap(s, s.poop.x, s.poop.y);

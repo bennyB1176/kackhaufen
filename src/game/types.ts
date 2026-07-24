@@ -21,6 +21,9 @@ export interface Poop {
   walk: number;
 }
 
+/** Art des Deko-/Versteck-Objekts, das gezeichnet wird. */
+export type ObstacleKind = "bush" | "stone" | "house";
+
 export interface Obstacle {
   /** linke Kante */
   x: number;
@@ -28,8 +31,8 @@ export interface Obstacle {
   y: number;
   width: number;
   height: number;
-  /** Emoji, das als Deko/Versteck gezeichnet wird */
-  emoji: string;
+  /** Art des Objekts (bestimmt die gezeichnete Form) */
+  kind: ObstacleKind;
 }
 
 /** Ein umfallender Kackhaufen als reine Animations-Entität. */
