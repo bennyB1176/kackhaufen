@@ -31,7 +31,7 @@ describe("engine", () => {
     expect(s.stars.length).toBeGreaterThan(0);
   });
 
-  it("Fehltreffer: -1 Punkt (mit 0-Grenze), Level bleibt gleich", () => {
+  it("Fehltreffer bei Level 0: -1 Punkt (mit 0-Grenze), Level bleibt 0", () => {
     const s = createGame(world);
     s.score = 2;
     const farX = s.poop.x + s.poop.size; // klar daneben
@@ -46,6 +46,23 @@ describe("engine", () => {
     const farX = s.poop.x + s.poop.size;
     handleTap(s, farX, s.poop.y);
     expect(s.score).toBe(0);
+  });
+
+  it("Fehltreffer bei Level > 0: Level sinkt, Kackhaufen wird größer und langsamer", () => {
+    const s = createGame(world);
+    handleTap(s, s.poop.x, s.poop.y); // Treffer -> Level 1
+    handleTap(s, s.poop.x, s.poop.y); // Treffer -> Level 2
+    expect(s.level).toBe(2);
+    const sizeAtLevel2 = s.poop.size;
+    const speedAtLevel2 = Math.abs(s.poop.vx);
+
+    const farX = s.poop.x + s.poop.size; // klar daneben
+    const res = handleTap(s, farX, s.poop.y);
+
+    expect(res).toBe("miss");
+    expect(s.level).toBe(1);
+    expect(s.poop.size).toBeGreaterThan(sizeAtLevel2);
+    expect(Math.abs(s.poop.vx)).toBeLessThan(speedAtLevel2);
   });
 
   it("Tap auf einen verdeckten Kackhaufen zählt als Fehltreffer", () => {

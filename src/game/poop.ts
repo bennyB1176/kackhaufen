@@ -20,6 +20,24 @@ export function spawnPoop(level: number, world: World): Poop {
 }
 
 /**
+ * Passt einen bereits laufenden Kackhaufen an ein (typischerweise
+ * niedrigeres) Level an, ohne ihn an den Rand zurückzusetzen. Wird bei
+ * einem Fehltreffer genutzt: der Kackhaufen wird dadurch sofort sichtbar
+ * wieder etwas größer und langsamer. Laufrichtung bleibt erhalten; die
+ * Position wird nur geklemmt, falls die neue Größe sonst über den Rand
+ * ragen würde.
+ */
+export function relaxPoop(poop: Poop, level: number, world: World): void {
+  const direction = Math.sign(poop.vx) || 1;
+  const size = sizeForLevel(level);
+  poop.size = size;
+  poop.vx = speedForLevel(level) * direction;
+  poop.y = groundY(world, size);
+  const half = size / 2;
+  poop.x = Math.min(Math.max(poop.x, half), world.width - half);
+}
+
+/**
  * Bewegt den Kackhaufen einen Zeitschritt weiter und lässt ihn an den
  * Rändern umkehren. Die Lauf-Phase treibt die Bein-Animation an.
  */

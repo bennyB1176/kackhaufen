@@ -6,7 +6,7 @@ import {
   STARS_PER_HIT,
   GROUND_HEIGHT,
 } from "./config";
-import { spawnPoop, updatePoop } from "./poop";
+import { spawnPoop, updatePoop, relaxPoop } from "./poop";
 import { hideChanceForLevel } from "./difficulty";
 import { isTapOnPoop, isPoopCovered } from "./collision";
 import { applyHit, applyMiss } from "./scoring";
@@ -87,7 +87,8 @@ function burstStars(state: GameState): void {
 /**
  * Verarbeitet einen Tap.
  * Treffer (auf sichtbaren Kackhaufen) => +1 Punkt, schwerer, Animationen.
- * Sonst => Fehltreffer (−1 Punkt, aber nie unter 0).
+ * Fehltreffer => −1 Punkt (nie unter 0) und einen Schritt leichter: der
+ * Kackhaufen wird wieder etwas größer und langsamer.
  */
 export function handleTap(state: GameState, x: number, y: number): TapResult {
   const hit =
@@ -95,6 +96,9 @@ export function handleTap(state: GameState, x: number, y: number): TapResult {
 
   if (!hit) {
     applyMiss(state);
+    state.level = Math.max(0, state.level - 1);
+    relaxPoop(state.poop, state.level, state.world);
+    state.obstacles = makeObstacles(state.level, state.world);
     return "miss";
   }
 
