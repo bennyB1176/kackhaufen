@@ -1,0 +1,15 @@
+# gitleaks-Konfiguration: nutzt die eingebauten Standard-Regeln
+# und ergänzt eine kleine Allowlist für dieses reine Frontend-Spiel
+# (keine Secrets im Repo, nur Build-Artefakte ausschließen).
+title = "kackhaufen gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Pfade ohne Geheimnisse"
+paths = [
+  '''(^|/)node_modules/''',
+  '''(^|/)dist/''',
+  '''package-lock\.json''',
+]

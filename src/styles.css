@@ -1,0 +1,69 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #0b3d2e;
+  font-family: "Baloo 2", "Comic Sans MS", system-ui, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+  user-select: none;
+}
+
+#game {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  touch-action: none;
+}
+
+/* Hinweis, wenn das Handy hochkant gehalten wird. */
+#rotate-hint {
+  position: fixed;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  background: #ffe14d;
+  color: #7a4a1e;
+  text-align: center;
+  padding: 24px;
+  z-index: 10;
+}
+
+#rotate-hint .emoji {
+  font-size: 84px;
+  animation: wobble 1.4s ease-in-out infinite;
+}
+
+#rotate-hint h1 {
+  font-size: 30px;
+}
+
+@keyframes wobble {
+  0%,
+  100% {
+    transform: rotate(-15deg);
+  }
+  50% {
+    transform: rotate(75deg);
+  }
+}
+
+/* Nur im Hochformat (und mit genug Platzverlust) einblenden. */
+@media (orientation: portrait) {
+  #rotate-hint {
+    display: flex;
+  }
+  #game {
+    filter: blur(3px);
+  }
+}
