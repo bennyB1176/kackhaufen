@@ -1,5 +1,5 @@
 import type { Poop, World } from "./types";
-import { GROUND_HEIGHT } from "./config";
+import { GROUND_HEIGHT, CAPTAIN_CHANCE } from "./config";
 import { sizeForLevel, speedForLevel } from "./difficulty";
 
 /** Y-Position (Mittelpunkt) des Kackhaufens, sodass er auf dem Boden steht. */
@@ -7,15 +7,26 @@ export function groundY(world: World, size: number): number {
   return world.height - GROUND_HEIGHT - size / 2 + size * 0.15;
 }
 
-/** Neuen Kackhaufen am linken Rand erzeugen, laufend nach rechts. */
-export function spawnPoop(level: number, world: World): Poop {
+/**
+ * Neuen Kackhaufen am linken Rand erzeugen, laufend nach rechts.
+ * Mit kleiner Wahrscheinlichkeit (ab Level 1) ist es der seltene, extra
+ * stinkige Kapitäns-Kackhaufen. Der Zufall wird als `rng` hereingereicht,
+ * damit die Spawn-Logik in Tests deterministisch bleibt.
+ */
+export function spawnPoop(
+  level: number,
+  world: World,
+  rng: () => number = Math.random,
+): Poop {
   const size = sizeForLevel(level);
+  const captain = level > 0 && rng() < CAPTAIN_CHANCE;
   return {
     x: size / 2 + 10,
     y: groundY(world, size),
     vx: speedForLevel(level), // positiv => nach rechts
     size,
     walk: 0,
+    captain,
   };
 }
 

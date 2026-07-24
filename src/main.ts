@@ -1,14 +1,35 @@
 import "./styles.css";
 import { WORLD_HEIGHT } from "./game/config";
-import { createGame, update, handleTap } from "./game/engine";
+import { createGame, update, handleTap, restartGame } from "./game/engine";
 import { draw } from "./render/renderer";
 import { computeView, attachTap, type ViewTransform } from "./input/pointer";
-import { unlockAudio, playHit, playMiss } from "./audio/sfx";
+import { unlockAudio, playHit, playMiss, playCheer } from "./audio/sfx";
 
 const canvas = document.getElementById("game") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d")!;
 const startScreen = document.getElementById("start-screen") as HTMLDivElement;
 const startButton = document.getElementById("start-button") as HTMLButtonElement;
+const gameoverScreen = document.getElementById("gameover-screen") as HTMLDivElement;
+const restartButton = document.getElementById("restart-button") as HTMLButtonElement;
+const finalScoreEl = document.getElementById("final-score") as HTMLSpanElement;
+const highscoreEl = document.getElementById("highscore") as HTMLSpanElement;
+const newRecordEl = document.getElementById("new-record") as HTMLDivElement;
+
+const HIGHSCORE_KEY = "kackhaufen.highscore";
+
+function loadHighscore(): number {
+  const raw = localStorage.getItem(HIGHSCORE_KEY);
+  const n = raw ? Number.parseInt(raw, 10) : 0;
+  return Number.isFinite(n) ? n : 0;
+}
+
+function saveHighscore(value: number): void {
+  try {
+    localStorage.setItem(HIGHSCORE_KEY, String(value));
+  } catch {
+    /* localStorage kann im Privatmodus fehlschlagen – dann eben kein Highscore. */
+  }
+}
 
 /** Welt-Höhe ist fix; die Breite passt sich dem Bildschirm-Seitenverhältnis an
  *  (so gibt es keine Balken). */
@@ -41,6 +62,7 @@ attachTap(
   canvas,
   () => view,
   (x, y) => {
+    if (state.phase !== "playing") return; // im Game-Over-Zustand keine Taps
     unlockAudio();
     const result = handleTap(state, x, y);
     if (result === "hit") playHit();
@@ -48,12 +70,32 @@ attachTap(
   },
 );
 
+/** Zeigt den Game-Over-Bildschirm mit Punktzahl und (evtl. neuem) Highscore. */
+function showGameOver(): void {
+  const best = loadHighscore();
+  const isRecord = state.score > best;
+  if (isRecord) saveHighscore(state.score);
+
+  finalScoreEl.textContent = String(state.score);
+  highscoreEl.textContent = String(Math.max(best, state.score));
+  newRecordEl.classList.toggle("hidden", !isRecord);
+  gameoverScreen.classList.remove("hidden");
+  playCheer();
+}
+
+let gameoverShown = false;
+
 let last = performance.now();
 function loop(now: number): void {
   const dt = Math.min(0.05, (now - last) / 1000);
   last = now;
 
   update(state, dt);
+
+  if (state.phase === "gameover" && !gameoverShown) {
+    gameoverShown = true;
+    showGameOver();
+  }
 
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   // Voll-bildschirm Himmelfarbe als Sicherheitsnetz (statt Balken).
@@ -81,6 +123,7 @@ async function startGame(): Promise<void> {
   }
   resize();
   startScreen.classList.add("hidden");
+  gameoverShown = false;
   if (!running) {
     running = true;
     last = performance.now();
@@ -88,4 +131,13 @@ async function startGame(): Promise<void> {
   }
 }
 
+/** „Nochmal!": neue Runde im selben State starten, Overlay ausblenden. */
+function restart(): void {
+  unlockAudio();
+  restartGame(state);
+  gameoverShown = false;
+  gameoverScreen.classList.add("hidden");
+}
+
 startButton.addEventListener("click", startGame);
+restartButton.addEventListener("click", restart);

@@ -1,5 +1,8 @@
 import type { GameState, Poop, Obstacle } from "../game/types";
 import { GROUND_HEIGHT } from "../game/config";
+import { comboMultiplier } from "../game/scoring";
+
+const HUD_FONT = 'bold 44px "Baloo 2","Comic Sans MS",system-ui,sans-serif';
 
 /**
  * Zeichnet die komplette Szene in Spielkoordinaten (Welt-Maße).
@@ -13,6 +16,11 @@ export function draw(ctx: CanvasRenderingContext2D, state: GameState): void {
   // Kackhaufen (hinter den Objekten)
   drawPoopBody(ctx, state.poop.x, state.poop.y, state.poop.size);
   drawLegs(ctx, state.poop);
+  // Kapitäns-Kackhaufen: extra Stinkwölkchen + Mütze (werden von Objekten verdeckt)
+  if (state.poop.captain) {
+    drawStinkLines(ctx, state.poop.x, state.poop.y, state.poop.size, state.poop.walk);
+    drawCaptainHat(ctx, state.poop.x, state.poop.y, state.poop.size);
+  }
 
   // umfallende Kackhaufen
   for (const f of state.falling) {
@@ -36,7 +44,10 @@ export function draw(ctx: CanvasRenderingContext2D, state: GameState): void {
     ctx.globalAlpha = 1;
   }
 
+  // HUD: Punkte (Mitte), Timer (links), Multiplikator (rechts)
   drawScore(ctx, state.score, world.width);
+  drawTimer(ctx, state.timeLeft);
+  drawMultiplier(ctx, state.combo, world.width);
 }
 
 // --------------------------------------------------------------------------
@@ -320,4 +331,137 @@ function drawScore(ctx: CanvasRenderingContext2D, score: number, w: number): voi
   ctx.strokeText(text, starX + 44, y);
   ctx.fillStyle = "#7a4a1e";
   ctx.fillText(text, starX + 44, y);
+}
+
+// --------------------------------------------------------------------------
+// HUD: Timer & Multiplikator
+// --------------------------------------------------------------------------
+
+/** Uhr-Icon mit verbleibenden Sekunden oben links (letzte 10 s rot). */
+function drawTimer(ctx: CanvasRenderingContext2D, timeLeft: number): void {
+  const secs = Math.ceil(timeLeft);
+  const low = secs <= 10;
+  const cx = 46;
+  const cy = 52;
+  const r = 26;
+
+  // Ziffernblatt
+  ctx.fillStyle = low ? "#ff6b6b" : "#ffffff";
+  ctx.strokeStyle = "#7a4a1e";
+  ctx.lineWidth = 5;
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+  // Zeiger
+  ctx.lineCap = "round";
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(cx, cy - r * 0.6);
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(cx + r * 0.5, cy + r * 0.1);
+  ctx.stroke();
+
+  // Sekunden-Zahl daneben
+  const text = String(secs);
+  ctx.font = HUD_FONT;
+  ctx.textAlign = "left";
+  ctx.textBaseline = "middle";
+  const tx = cx + r + 12;
+  ctx.lineWidth = 8;
+  ctx.strokeStyle = "#ffffff";
+  ctx.strokeText(text, tx, cy);
+  ctx.fillStyle = low ? "#d13030" : "#7a4a1e";
+  ctx.fillText(text, tx, cy);
+}
+
+/** Combo-Multiplikator oben rechts (nur ab x2 sichtbar). */
+function drawMultiplier(
+  ctx: CanvasRenderingContext2D,
+  combo: number,
+  w: number,
+): void {
+  const mult = comboMultiplier(combo);
+  if (mult <= 1) return;
+  const text = `x${mult}`;
+  ctx.font = HUD_FONT;
+  ctx.textAlign = "right";
+  ctx.textBaseline = "middle";
+  const x = w - 40;
+  const y = 52;
+  ctx.lineWidth = 9;
+  ctx.strokeStyle = "#ffffff";
+  ctx.strokeText(text, x, y);
+  ctx.fillStyle = "#ff8a1e";
+  ctx.fillText(text, x, y);
+}
+
+// --------------------------------------------------------------------------
+// Kapitäns-Kackhaufen: Mütze & Stinkwölkchen
+// --------------------------------------------------------------------------
+
+/** Aufsteigende grünliche Duftwölkchen an beiden Seiten – „extra stinkig". */
+function drawStinkLines(
+  ctx: CanvasRenderingContext2D,
+  cx: number,
+  cy: number,
+  size: number,
+  phase: number,
+): void {
+  ctx.strokeStyle = "rgba(120, 190, 90, 0.8)";
+  ctx.lineWidth = Math.max(3, size * 0.03);
+  ctx.lineCap = "round";
+  const baseY = cy - size * 0.02;
+  for (const side of [-1, 1]) {
+    const x = cx + side * size * 0.38;
+    const wob = Math.sin(phase * Math.PI * 2 + side) * size * 0.06;
+    ctx.beginPath();
+    ctx.moveTo(x, baseY);
+    ctx.bezierCurveTo(
+      x - size * 0.1 + wob,
+      baseY - size * 0.18,
+      x + size * 0.1 + wob,
+      baseY - size * 0.34,
+      x + wob * 0.5,
+      baseY - size * 0.5,
+    );
+    ctx.stroke();
+  }
+}
+
+/** Weiße Kapitänsmütze mit dunklem Band, Schirm und goldenem Stern-Emblem. */
+function drawCaptainHat(
+  ctx: CanvasRenderingContext2D,
+  cx: number,
+  cy: number,
+  size: number,
+): void {
+  const bandY = cy - size * 0.34;
+  const bandW = size * 0.5;
+  const bandH = size * 0.11;
+
+  // Schirm (schwarz), leicht nach unten/vorne
+  ctx.fillStyle = "#1a1a2e";
+  ctx.beginPath();
+  ctx.ellipse(cx, bandY + bandH * 0.6, bandW * 0.62, size * 0.045, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Krone (weiß, rund nach oben gewölbt)
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath();
+  ctx.moveTo(cx - bandW / 2, bandY);
+  ctx.quadraticCurveTo(cx - bandW * 0.52, bandY - size * 0.24, cx, bandY - size * 0.22);
+  ctx.quadraticCurveTo(cx + bandW * 0.52, bandY - size * 0.24, cx + bandW / 2, bandY);
+  ctx.closePath();
+  ctx.fill();
+  // dezente Schattierung an der Kronen-Unterkante
+  ellipse(ctx, cx, bandY - size * 0.02, bandW * 0.48, size * 0.03, "#e6ebf2");
+
+  // Band (marineblau)
+  ctx.fillStyle = "#16233f";
+  ctx.fillRect(cx - bandW / 2, bandY - bandH / 2, bandW, bandH);
+
+  // goldenes Stern-Emblem vorne mittig
+  drawStar(ctx, cx, bandY, size * 0.07, "#ffd23f");
 }

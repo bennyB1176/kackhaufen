@@ -29,3 +29,14 @@ export const FALL_DURATION = 1.1; // Sekunden, die ein Kackhaufen fällt
 export const FALL_GRAVITY = 1400; // px/s^2
 export const STAR_DURATION = 0.7; // Lebensdauer eines Sternchens
 export const STARS_PER_HIT = 8;
+
+// --- Runde & Zeit ---
+export const ROUND_TIME = 60; // Sekunden pro Runde
+
+// --- Combo-Multiplikator ---
+export const COMBO_STEP = 5; // alle 5 Treffer in Folge +1 Multiplikator
+export const MAX_MULTIPLIER = 5; // Deckel für den Multiplikator
+
+// --- Kapitäns-Kackhaufen (seltener, extra stinkiger Bonus-Haufen) ---
+export const CAPTAIN_CHANCE = 0.12; // Wahrscheinlichkeit pro Spawn (ab Level 1)
+export const CAPTAIN_BONUS = 5; // Basispunkte statt 1 (wird mit Multiplikator multipliziert)

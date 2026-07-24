@@ -3,7 +3,7 @@ import { isTapOnPoop, isPoopCovered } from "../src/game/collision";
 import type { Poop, Obstacle } from "../src/game/types";
 
 function poopAt(x: number, y: number, size = 180): Poop {
-  return { x, y, vx: 100, size, walk: 0 };
+  return { x, y, vx: 100, size, walk: 0, captain: false };
 }
 
 describe("collision", () => {

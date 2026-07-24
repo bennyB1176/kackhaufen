@@ -19,6 +19,11 @@ export interface Poop {
   size: number;
   /** Phase 0..1 für den Bein-Lauf-Zyklus */
   walk: number;
+  /**
+   * Ist dies der seltene extra-stinkige Kapitäns-Kackhaufen (mit Mütze und
+   * Duftwölkchen)? Ein Treffer bringt dann Bonuspunkte.
+   */
+  captain: boolean;
 }
 
 /** Art des Deko-/Versteck-Objekts, das gezeichnet wird. */
@@ -57,11 +62,22 @@ export interface Star {
   life: number;
 }
 
+/** Phase des Spiels: laufende Runde oder Game-Over-Bildschirm. */
+export type GamePhase = "playing" | "gameover";
+
 export interface GameState {
   world: World;
   score: number;
   /** steigt mit jedem Treffer und steuert die Schwierigkeit */
   level: number;
+  /** aktueller Spielzustand (Runde läuft oder vorbei) */
+  phase: GamePhase;
+  /** verbleibende Zeit der Runde in Sekunden */
+  timeLeft: number;
+  /** Treffer in Folge (steuert den Punkte-Multiplikator) */
+  combo: number;
+  /** höchste in dieser Runde erreichte Combo */
+  bestCombo: number;
   poop: Poop;
   obstacles: Obstacle[];
   falling: FallingPoop[];

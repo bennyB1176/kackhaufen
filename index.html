@@ -14,9 +14,18 @@
 
     <div id="start-screen">
       <h1>Kackhaufen fangen!</h1>
-      <p>Tippe den laufenden Kackhaufen an, so schnell du kannst!</p>
+      <p>Tippe den laufenden Kackhaufen an, so schnell du kannst! Du hast 60 Sekunden.</p>
+      <p>Treffer in Folge geben Extra-Punkte. Fang den stinkigen Kapitän 🧢 für einen dicken Bonus!</p>
       <button id="start-button" type="button">Los geht's!</button>
       <p class="hint">Am besten im Querformat 🔄</p>
+    </div>
+
+    <div id="gameover-screen" class="hidden">
+      <div id="new-record" class="hidden">🏆 Neuer Rekord! 🏆</div>
+      <h1>Zeit um! ⏱️</h1>
+      <p class="big">Punkte: <span id="final-score">0</span></p>
+      <p>Highscore: <span id="highscore">0</span></p>
+      <button id="restart-button" type="button">Nochmal!</button>
     </div>
 
     <div id="rotate-hint">

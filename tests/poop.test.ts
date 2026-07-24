@@ -13,6 +13,23 @@ describe("poop", () => {
     expect(p.x).toBeGreaterThan(0);
   });
 
+  describe("Kapitäns-Kackhaufen (seltener Bonus-Haufen)", () => {
+    it("wird bei kleinem Zufallswert ab Level 1 zum Kapitän", () => {
+      const p = spawnPoop(3, world, () => 0);
+      expect(p.captain).toBe(true);
+    });
+
+    it("ist bei großem Zufallswert kein Kapitän", () => {
+      const p = spawnPoop(3, world, () => 0.99);
+      expect(p.captain).toBe(false);
+    });
+
+    it("ist auf Level 0 nie ein Kapitän (ruhiger Start)", () => {
+      const p = spawnPoop(0, world, () => 0);
+      expect(p.captain).toBe(false);
+    });
+  });
+
   it("bewegt sich pro Update in vx-Richtung", () => {
     const p = spawnPoop(0, world);
     const startX = p.x;

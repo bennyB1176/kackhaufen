@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
-import { createGame, update, handleTap } from "../src/game/engine";
+import { createGame, update, handleTap, restartGame } from "../src/game/engine";
 import type { Obstacle } from "../src/game/types";
+import { ROUND_TIME } from "../src/game/config";
 
 const world = { width: 1280, height: 720 };
 
@@ -10,6 +11,14 @@ describe("engine", () => {
     expect(s.score).toBe(0);
     expect(s.level).toBe(0);
     expect(s.poop).toBeDefined();
+  });
+
+  it("startet in Phase 'playing' mit voller Rundenzeit und Combo 0", () => {
+    const s = createGame(world);
+    expect(s.phase).toBe("playing");
+    expect(s.timeLeft).toBe(ROUND_TIME);
+    expect(s.combo).toBe(0);
+    expect(s.bestCombo).toBe(0);
   });
 
   it("Treffer: +1 Punkt, Level steigt, neuer Kackhaufen ist kleiner und schneller", () => {
@@ -94,5 +103,51 @@ describe("engine", () => {
     update(s, 5);
     expect(s.stars.length).toBeLessThan(starsBefore);
     expect(s.falling.length).toBe(0);
+  });
+
+  it("update zählt die Rundenzeit herunter", () => {
+    const s = createGame(world);
+    update(s, 1);
+    expect(s.timeLeft).toBeCloseTo(ROUND_TIME - 1);
+    expect(s.phase).toBe("playing");
+  });
+
+  it("bei abgelaufener Zeit wechselt die Phase auf 'gameover'", () => {
+    const s = createGame(world);
+    update(s, ROUND_TIME + 1);
+    expect(s.timeLeft).toBe(0);
+    expect(s.phase).toBe("gameover");
+  });
+
+  it("im Game-Over-Zustand hat ein Tap keine Wirkung", () => {
+    const s = createGame(world);
+    s.phase = "gameover";
+    s.score = 7;
+    const res = handleTap(s, s.poop.x, s.poop.y); // säße sonst ein Treffer
+    expect(res).toBe("miss");
+    expect(s.score).toBe(7);
+    expect(s.level).toBe(0);
+  });
+
+  it("erzeugt bei kleinem Zufallswert einen Kapitäns-Kackhaufen (ab Level 1)", () => {
+    const s = createGame(world, () => 0.99); // Start-Poop nie Kapitän
+    expect(s.poop.captain).toBe(false);
+    handleTap(s, s.poop.x, s.poop.y, () => 0); // Treffer -> Level 1, Kapitän
+    expect(s.level).toBe(1);
+    expect(s.poop.captain).toBe(true);
+  });
+
+  it("restartGame setzt Zeit, Phase, Punkte, Level und Combo zurück", () => {
+    const s = createGame(world);
+    handleTap(s, s.poop.x, s.poop.y); // Punkte + Level + Combo hoch
+    update(s, ROUND_TIME + 1); // Runde beenden
+    expect(s.phase).toBe("gameover");
+
+    restartGame(s);
+    expect(s.phase).toBe("playing");
+    expect(s.timeLeft).toBe(ROUND_TIME);
+    expect(s.score).toBe(0);
+    expect(s.level).toBe(0);
+    expect(s.combo).toBe(0);
   });
 });

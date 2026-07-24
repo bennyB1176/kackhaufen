@@ -56,3 +56,9 @@ export function playMiss(): void {
   tone(220, 0.18, "sine", 0, 0.12);
   tone(160, 0.22, "sine", 0.1, 0.12);
 }
+
+/** Fröhliche kleine Fanfare am Rundenende (Game-Over / neuer Rekord). */
+export function playCheer(): void {
+  const notes = [523, 659, 784, 1046]; // C5, E5, G5, C6
+  notes.forEach((f, i) => tone(f, 0.22, "triangle", i * 0.11, 0.16));
+}

@@ -5,6 +5,7 @@ import {
   STAR_DURATION,
   STARS_PER_HIT,
   GROUND_HEIGHT,
+  ROUND_TIME,
 } from "./config";
 import { spawnPoop, updatePoop, relaxPoop } from "./poop";
 import { hideChanceForLevel } from "./difficulty";
@@ -42,16 +43,34 @@ export function makeObstacles(level: number, world: World): Obstacle[] {
   return obstacles;
 }
 
-export function createGame(world: World): GameState {
+export function createGame(
+  world: World,
+  rng: () => number = Math.random,
+): GameState {
   return {
     world,
     score: 0,
     level: 0,
-    poop: spawnPoop(0, world),
+    phase: "playing",
+    timeLeft: ROUND_TIME,
+    combo: 0,
+    bestCombo: 0,
+    poop: spawnPoop(0, world, rng),
     obstacles: makeObstacles(0, world),
     falling: [],
     stars: [],
   };
+}
+
+/**
+ * Startet eine neue Runde im selben State-Objekt (für den „Nochmal!"-Knopf):
+ * Zeit, Punkte, Level, Combo und Phase werden zurückgesetzt.
+ */
+export function restartGame(
+  state: GameState,
+  rng: () => number = Math.random,
+): void {
+  Object.assign(state, createGame(state.world, rng));
 }
 
 /** Verwandelt den aktuellen Kackhaufen in einen lustig umfallenden. */
@@ -90,7 +109,15 @@ function burstStars(state: GameState): void {
  * Fehltreffer => −1 Punkt (nie unter 0) und einen Schritt leichter: der
  * Kackhaufen wird wieder etwas größer und langsamer.
  */
-export function handleTap(state: GameState, x: number, y: number): TapResult {
+export function handleTap(
+  state: GameState,
+  x: number,
+  y: number,
+  rng: () => number = Math.random,
+): TapResult {
+  // Nach dem Rundenende zählen Taps nicht mehr (der Game-Over-Screen liegt davor).
+  if (state.phase !== "playing") return "miss";
+
   const hit =
     isTapOnPoop(state.poop, x, y) && !isPoopCovered(state.poop, state.obstacles);
 
@@ -106,14 +133,22 @@ export function handleTap(state: GameState, x: number, y: number): TapResult {
   launchFallingPoop(state);
   burstStars(state);
   state.level += 1;
-  state.poop = spawnPoop(state.level, state.world);
+  state.poop = spawnPoop(state.level, state.world, rng);
   state.obstacles = makeObstacles(state.level, state.world);
   return "hit";
 }
 
 /** Bewegt die Welt einen Zeitschritt weiter (Sekunden). */
 export function update(state: GameState, dt: number): void {
-  updatePoop(state.poop, dt, state.world);
+  if (state.phase === "playing") {
+    state.timeLeft -= dt;
+    if (state.timeLeft <= 0) {
+      state.timeLeft = 0;
+      state.phase = "gameover";
+    }
+    // Der Kackhaufen läuft nur während der Runde; nach Rundenende hält er an.
+    updatePoop(state.poop, dt, state.world);
+  }
 
   for (const f of state.falling) {
     f.vy += FALL_GRAVITY * dt;
