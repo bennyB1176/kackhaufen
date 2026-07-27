@@ -1,5 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { createGame, update, handleTap, restartGame } from "../src/game/engine";
+import {
+  createGame,
+  update,
+  handleTap,
+  restartGame,
+  makeObstacles,
+} from "../src/game/engine";
 import type { Obstacle } from "../src/game/types";
 import { ROUND_TIME } from "../src/game/config";
 
@@ -135,6 +141,47 @@ describe("engine", () => {
     handleTap(s, s.poop.x, s.poop.y, () => 0); // Treffer -> Level 1, Kapitän
     expect(s.level).toBe(1);
     expect(s.poop.captain).toBe(true);
+  });
+
+  describe("Objekte bleiben an ihrem Platz", () => {
+    /** Mittelpunkt eines Objekts – daran hängt die wahrgenommene Position. */
+    const centers = (level: number) =>
+      makeObstacles(level, world).map((o) => o.x + o.width / 2);
+
+    it("verschiebt vorhandene Objekte nicht, wenn ein weiteres dazukommt", () => {
+      // Level mit 1, 2, 3 und 4 Objekten heraussuchen.
+      const byCount = new Map<number, number>();
+      for (let level = 0; level <= 30; level++) {
+        const n = makeObstacles(level, world).length;
+        if (n > 0 && !byCount.has(n)) byCount.set(n, level);
+      }
+      expect(byCount.size).toBeGreaterThan(1);
+
+      const counts = [...byCount.keys()].sort((a, b) => a - b);
+      for (let i = 1; i < counts.length; i++) {
+        const before = centers(byCount.get(counts[i - 1])!);
+        const after = centers(byCount.get(counts[i])!);
+        // Die schon vorhandenen Objekte stehen weiterhin an derselben Stelle.
+        expect(after.slice(0, before.length)).toEqual(before);
+      }
+    });
+
+    it("lässt nur die Größe mit dem Level variieren, nicht die Mitte", () => {
+      const a = makeObstacles(5, world);
+      const b = makeObstacles(6, world);
+      expect(a).toHaveLength(b.length);
+      a.forEach((o, i) => {
+        expect(o.x + o.width / 2).toBeCloseTo(b[i].x + b[i].width / 2);
+      });
+      // Größe darf sich unterscheiden (Kackhaufen schrumpft ja auch).
+      expect(a[0].width).toBeGreaterThanOrEqual(b[0].width);
+    });
+
+    it("behält die Art eines Platzes bei (Busch bleibt Busch)", () => {
+      const a = makeObstacles(5, world);
+      const b = makeObstacles(12, world);
+      a.forEach((o, i) => expect(b[i].kind).toBe(o.kind));
+    });
   });
 
   it("restartGame setzt Zeit, Phase, Punkte, Level und Combo zurück", () => {

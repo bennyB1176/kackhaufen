@@ -15,32 +15,47 @@ import { applyHit, applyMiss } from "./scoring";
 
 const OBSTACLE_KINDS: ObstacleKind[] = ["bush", "stone", "house"];
 
+/** So viele Objekte können höchstens dastehen. */
+const MAX_OBSTACLES = 4;
+/**
+ * Reihenfolge, in der die festen Plätze belegt werden – erst die mittleren,
+ * dann die äußeren. So steht ein einzelnes Objekt nicht am Rand.
+ */
+const SLOT_ORDER = [1, 2, 0, 3];
+
 /**
  * Deko-Objekte, hinter denen sich der Kackhaufen verstecken kann.
  * Mit steigendem Level (höhere Versteck-Chance) werden es mehr.
+ *
+ * Die Plätze sind **fest**: ihr Abstand hängt an MAX_OBSTACLES, nicht an der
+ * aktuellen Anzahl. Kommt ein Objekt dazu, bleiben die bereits stehenden also
+ * liegen – nur ihre Größe wächst mit dem Level mit. (Vorher wurden bei jeder
+ * Änderung alle Objekte neu verteilt, was bei jedem Treffer heruntersprang.)
  * Deterministisch, damit die Logik testbar bleibt.
  */
 export function makeObstacles(level: number, world: World): Obstacle[] {
   const chance = hideChanceForLevel(level);
-  const count = Math.min(4, Math.round(chance * 6));
+  const count = Math.min(MAX_OBSTACLES, Math.round(chance * 6));
   if (count <= 0) return [];
 
-  const obstacles: Obstacle[] = [];
   const usable = world.width * 0.7;
   const startX = world.width * 0.18;
-  const gap = usable / count;
+  const gap = usable / MAX_OBSTACLES;
+  // Breit genug, dass der Kackhaufen dahinter wirklich verschwindet –
+  // sonst schaut er heraus, obwohl er laut Logik nicht tappbar ist.
+  const w = Math.max(150, sizeForLevel(level) * 1.15);
+  const h = 230;
+
+  const obstacles: Obstacle[] = [];
   for (let i = 0; i < count; i++) {
-    // Breit genug, dass der Kackhaufen dahinter wirklich verschwindet –
-    // sonst schaut er heraus, obwohl er laut Logik nicht tappbar ist.
-    const w = Math.max(150, sizeForLevel(level) * 1.15);
-    const h = 230;
-    const x = startX + gap * i + (gap - w) / 2;
+    const slot = SLOT_ORDER[i];
+    const center = startX + gap * (slot + 0.5);
     obstacles.push({
-      x,
+      x: center - w / 2, // um die feste Mitte herum wachsen/schrumpfen
       y: world.height - GROUND_HEIGHT - h + 40,
       width: w,
       height: h,
-      kind: OBSTACLE_KINDS[i % OBSTACLE_KINDS.length],
+      kind: OBSTACLE_KINDS[slot % OBSTACLE_KINDS.length],
     });
   }
   return obstacles;
