@@ -40,3 +40,19 @@ export const MAX_MULTIPLIER = 5; // Deckel für den Multiplikator
 // --- Kapitäns-Kackhaufen (seltener, extra stinkiger Bonus-Haufen) ---
 export const CAPTAIN_CHANCE = 0.12; // Wahrscheinlichkeit pro Spawn (ab Level 1)
 export const CAPTAIN_BONUS = 5; // Basispunkte statt 1 (wird mit Multiplikator multipliziert)
+
+// --- Bewegungsart „Hüpfen" ---
+export const HOP_INTERVAL = 0.45; // Pause zwischen zwei Sprüngen in Sekunden
+export const HOP_VELOCITY = 520; // Absprunggeschwindigkeit nach oben in px/s
+export const HOP_GRAVITY = 1500; // px/s^2
+
+// --- Bewegungsart „Flitzen" (Stop-and-Go) ---
+export const DASH_PAUSE = 0.55; // Sekunden Stillstand vor dem Losflitzen
+export const DASH_RUN_TIME = 0.9; // Sekunden Sprint am Stück
+export const DASH_SPEED_FACTOR = 2.1; // Tempo-Faktor während des Sprints
+
+// --- Bewegungsart „Verstecken" (hinter Objekten hervorlugen) ---
+export const PEEK_OUT_TIME = 1.3; // Sekunden sichtbar (tappbar)
+export const PEEK_HIDE_TIME = 0.7; // Sekunden versteckt
+export const PEEK_SLIDE_SPEED = 430; // px/s beim Rein- und Rausgleiten
+export const PEEK_MARGIN = 0.2; // wie weit er hervorlugt (× Größe)

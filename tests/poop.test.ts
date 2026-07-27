@@ -9,8 +9,9 @@ describe("poop", () => {
     const p = spawnPoop(0, world);
     expect(p.size).toBe(sizeForLevel(0));
     expect(Math.abs(p.vx)).toBe(speedForLevel(0));
-    expect(p.vx).toBeGreaterThan(0); // läuft von links nach rechts
+    expect(p.vx).toBeGreaterThan(0); // Basis-Spawn läuft von links nach rechts
     expect(p.x).toBeGreaterThan(0);
+    expect(p.mode).toBe("walk"); // die Bewegungsart setzt erst startMotion
   });
 
   describe("Kapitäns-Kackhaufen (seltener Bonus-Haufen)", () => {

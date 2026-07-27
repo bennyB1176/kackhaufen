@@ -31,10 +31,24 @@ export function draw(ctx: CanvasRenderingContext2D, state: GameState): void {
     ctx.restore();
   }
 
-  // Objekte davor (verdecken den Kackhaufen)
-  for (const o of state.obstacles) {
+  // Objekte davor (verdecken den Kackhaufen). Das Objekt, hinter dem er
+  // gerade steckt, wackelt leicht – so ist vorher zu ahnen, wo er gleich
+  // hervorlugt, und das Versteckspiel bleibt fair.
+  state.obstacles.forEach((o, i) => {
+    const { poop } = state;
+    const wobbling =
+      poop.mode === "peek" && poop.peekPhase === "hiding" && poop.anchor === i;
+    if (!wobbling) {
+      drawObstacle(ctx, o);
+      return;
+    }
+    // `timer` läuft während des Versteckens herunter und treibt das Wackeln an.
+    const sway = Math.sin(poop.timer * 26) * 5;
+    ctx.save();
+    ctx.translate(sway, 0);
     drawObstacle(ctx, o);
-  }
+    ctx.restore();
+  });
 
   // Sternchen-Feuerwerk
   for (const s of state.stars) {

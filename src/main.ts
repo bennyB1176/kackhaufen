@@ -4,6 +4,16 @@ import { createGame, update, handleTap, restartGame } from "./game/engine";
 import { draw } from "./render/renderer";
 import { computeView, attachTap, type ViewTransform } from "./input/pointer";
 import { unlockAudio, playHit, playMiss, playCheer } from "./audio/sfx";
+import {
+  loadHighscores,
+  saveHighscores,
+  loadLastName,
+  saveLastName,
+  qualifies,
+  insertEntry,
+  sanitizeName,
+  type HighscoreEntry,
+} from "./game/highscore";
 
 const canvas = document.getElementById("game") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d")!;
@@ -12,23 +22,46 @@ const startButton = document.getElementById("start-button") as HTMLButtonElement
 const gameoverScreen = document.getElementById("gameover-screen") as HTMLDivElement;
 const restartButton = document.getElementById("restart-button") as HTMLButtonElement;
 const finalScoreEl = document.getElementById("final-score") as HTMLSpanElement;
-const highscoreEl = document.getElementById("highscore") as HTMLSpanElement;
 const newRecordEl = document.getElementById("new-record") as HTMLDivElement;
+const nameEntry = document.getElementById("name-entry") as HTMLDivElement;
+const nameInput = document.getElementById("name-input") as HTMLInputElement;
+const saveNameButton = document.getElementById("save-name-button") as HTMLButtonElement;
+const highscoreList = document.getElementById("highscore-list") as HTMLOListElement;
 
-const HIGHSCORE_KEY = "kackhaufen.highscore";
+/**
+ * Zeichnet die Bestenliste. `highlight` markiert den gerade eingetragenen
+ * Namen (Index in der Liste), damit man sich sofort wiederfindet.
+ */
+function renderHighscores(list: HighscoreEntry[], highlight = -1): void {
+  highscoreList.replaceChildren();
 
-function loadHighscore(): number {
-  const raw = localStorage.getItem(HIGHSCORE_KEY);
-  const n = raw ? Number.parseInt(raw, 10) : 0;
-  return Number.isFinite(n) ? n : 0;
-}
-
-function saveHighscore(value: number): void {
-  try {
-    localStorage.setItem(HIGHSCORE_KEY, String(value));
-  } catch {
-    /* localStorage kann im Privatmodus fehlschlagen – dann eben kein Highscore. */
+  if (list.length === 0) {
+    const li = document.createElement("li");
+    li.className = "empty";
+    li.textContent = "Noch keine Einträge – sei der Erste!";
+    highscoreList.append(li);
+    return;
   }
+
+  list.forEach((entry, i) => {
+    const li = document.createElement("li");
+    if (i === highlight) li.classList.add("is-new");
+
+    const rank = document.createElement("span");
+    rank.className = "rank";
+    rank.textContent = `${i + 1}.`;
+
+    const name = document.createElement("span");
+    name.className = "name";
+    name.textContent = entry.name;
+
+    const points = document.createElement("span");
+    points.className = "points";
+    points.textContent = String(entry.score);
+
+    li.append(rank, name, points);
+    highscoreList.append(li);
+  });
 }
 
 /** Welt-Höhe ist fix; die Breite passt sich dem Bildschirm-Seitenverhältnis an
@@ -70,17 +103,46 @@ attachTap(
   },
 );
 
-/** Zeigt den Game-Over-Bildschirm mit Punktzahl und (evtl. neuem) Highscore. */
+/**
+ * Zeigt den Game-Over-Bildschirm: Punktzahl, Bestenliste und – wenn der
+ * Punktestand für die Liste reicht – das Feld für den Namen.
+ */
 function showGameOver(): void {
-  const best = loadHighscore();
-  const isRecord = state.score > best;
-  if (isRecord) saveHighscore(state.score);
+  const list = loadHighscores();
+  const madeIt = qualifies(list, state.score);
 
   finalScoreEl.textContent = String(state.score);
-  highscoreEl.textContent = String(Math.max(best, state.score));
-  newRecordEl.classList.toggle("hidden", !isRecord);
+  renderHighscores(list);
+  newRecordEl.classList.add("hidden");
+
+  nameEntry.classList.toggle("hidden", !madeIt);
+  if (madeIt) {
+    nameInput.value = loadLastName();
+    // Erst nach dem Einblenden fokussieren, sonst öffnet die Handy-Tastatur nicht.
+    requestAnimationFrame(() => {
+      nameInput.focus();
+      nameInput.select();
+    });
+  }
+
   gameoverScreen.classList.remove("hidden");
   playCheer();
+}
+
+/** Trägt den eingegebenen Namen mit dem Punktestand in die Bestenliste ein. */
+function submitName(): void {
+  const name = sanitizeName(nameInput.value);
+  const entry: HighscoreEntry = { name, score: state.score };
+  const list = insertEntry(loadHighscores(), entry);
+  const position = list.indexOf(entry);
+
+  saveHighscores(list);
+  saveLastName(name);
+
+  renderHighscores(list, position);
+  newRecordEl.classList.toggle("hidden", position !== 0);
+  nameEntry.classList.add("hidden");
+  nameInput.blur();
 }
 
 let gameoverShown = false;
@@ -137,7 +199,17 @@ function restart(): void {
   restartGame(state);
   gameoverShown = false;
   gameoverScreen.classList.add("hidden");
+  nameEntry.classList.add("hidden");
+  newRecordEl.classList.add("hidden");
 }
 
 startButton.addEventListener("click", startGame);
 restartButton.addEventListener("click", restart);
+saveNameButton.addEventListener("click", submitName);
+// Auf dem Handy schickt die Enter-Taste der Tastatur den Namen ab.
+nameInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    submitName();
+  }
+});

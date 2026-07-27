@@ -21,10 +21,27 @@
     </div>
 
     <div id="gameover-screen" class="hidden">
-      <div id="new-record" class="hidden">🏆 Neuer Rekord! 🏆</div>
+      <div id="new-record" class="hidden">🏆 Platz 1! 🏆</div>
       <h1>Zeit um! ⏱️</h1>
       <p class="big">Punkte: <span id="final-score">0</span></p>
-      <p>Highscore: <span id="highscore">0</span></p>
+
+      <div id="name-entry" class="hidden">
+        <label for="name-input">Trag deinen Namen ein!</label>
+        <div class="row">
+          <input
+            id="name-input"
+            type="text"
+            maxlength="12"
+            autocomplete="off"
+            autocapitalize="words"
+            spellcheck="false"
+            placeholder="Dein Name"
+          />
+          <button id="save-name-button" type="button">Eintragen</button>
+        </div>
+      </div>
+
+      <ol id="highscore-list"></ol>
       <button id="restart-button" type="button">Nochmal!</button>
     </div>
 

@@ -27,6 +27,14 @@ export function spawnPoop(
     size,
     walk: 0,
     captain,
+    // Standard-Bewegung; die eigentliche Bewegungsart setzt `startMotion`
+    // aus movement.ts direkt nach dem Spawn.
+    mode: "walk",
+    vy: 0,
+    timer: 0,
+    anchor: -1,
+    peekPhase: "out",
+    peekSide: 1,
   };
 }
 
@@ -44,6 +52,7 @@ export function relaxPoop(poop: Poop, level: number, world: World): void {
   poop.size = size;
   poop.vx = speedForLevel(level) * direction;
   poop.y = groundY(world, size);
+  poop.vy = 0; // ein laufender Sprung wird dabei abgebrochen
   const half = size / 2;
   poop.x = Math.min(Math.max(poop.x, half), world.width - half);
 }

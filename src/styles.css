@@ -68,8 +68,136 @@ body {
   font-weight: 800;
 }
 
-#gameover-screen span {
+/* Nur die Punktzahl in den Absätzen hervorheben – nicht die Spans der
+   Bestenliste, die ihre Farbe von der jeweiligen Zeile erben. */
+#gameover-screen p span {
   color: #ffe14d;
+}
+
+/* Der Game-Over-Screen trägt mehr Inhalt – etwas kompakter halten. */
+#gameover-screen {
+  gap: 12px;
+}
+
+/* --- Namenseingabe --- */
+#name-entry {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+#name-entry.hidden {
+  display: none;
+}
+
+#name-entry label {
+  font-size: clamp(15px, 3.5vw, 22px);
+  color: #fff;
+  text-shadow: 0 2px 3px rgba(0, 0, 0, 0.3);
+}
+
+#name-entry .row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+#name-input {
+  font-family: inherit;
+  font-size: clamp(18px, 4vw, 26px);
+  font-weight: 700;
+  color: #7a4a1e;
+  background: #fff;
+  border: 4px solid #ffe14d;
+  border-radius: 999px;
+  padding: 8px 18px;
+  width: min(46vw, 240px);
+  text-align: center;
+  /* body sperrt global Auswahl und Touch-Gesten – hier wieder freigeben,
+     sonst lässt sich das Feld auf dem Handy nicht bedienen. */
+  user-select: text;
+  -webkit-user-select: text;
+  touch-action: manipulation;
+}
+
+#name-input:focus {
+  outline: none;
+  border-color: #ffb000;
+}
+
+#save-name-button {
+  font-family: inherit;
+  font-weight: 800;
+  font-size: clamp(15px, 3.5vw, 22px);
+  color: #7a4a1e;
+  background: #ffe14d;
+  border: none;
+  border-radius: 999px;
+  padding: 12px 22px;
+  box-shadow: 0 5px 0 #d9a900;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+#save-name-button:active {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 #d9a900;
+}
+
+/* --- Bestenliste --- */
+#highscore-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: min(86vw, 380px);
+  color: #fff;
+  font-size: clamp(14px, 3.2vw, 20px);
+  text-shadow: 0 2px 3px rgba(0, 0, 0, 0.3);
+}
+
+#highscore-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 999px;
+  padding: 5px 16px;
+}
+
+#highscore-list .rank {
+  font-weight: 800;
+  min-width: 1.6em;
+}
+
+#highscore-list .name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
+
+#highscore-list .points {
+  font-weight: 800;
+  color: #ffe14d;
+}
+
+/* Frisch eingetragener Eintrag wird hervorgehoben. */
+#highscore-list li.is-new {
+  background: #ffe14d;
+  color: #7a4a1e;
+  text-shadow: none;
+}
+
+#highscore-list li.is-new .points {
+  color: #7a4a1e;
+}
+
+#highscore-list .empty {
+  justify-content: center;
+  opacity: 0.9;
 }
 
 /* „Neuer Rekord!"-Abzeichen (nur bei neuem Highscore sichtbar). */

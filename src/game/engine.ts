@@ -7,8 +7,9 @@ import {
   GROUND_HEIGHT,
   ROUND_TIME,
 } from "./config";
-import { spawnPoop, updatePoop, relaxPoop } from "./poop";
-import { hideChanceForLevel } from "./difficulty";
+import { spawnPoop, relaxPoop } from "./poop";
+import { startMotion, updateMovement } from "./movement";
+import { hideChanceForLevel, sizeForLevel } from "./difficulty";
 import { isTapOnPoop, isPoopCovered } from "./collision";
 import { applyHit, applyMiss } from "./scoring";
 
@@ -29,7 +30,9 @@ export function makeObstacles(level: number, world: World): Obstacle[] {
   const startX = world.width * 0.18;
   const gap = usable / count;
   for (let i = 0; i < count; i++) {
-    const w = 130;
+    // Breit genug, dass der Kackhaufen dahinter wirklich verschwindet –
+    // sonst schaut er heraus, obwohl er laut Logik nicht tappbar ist.
+    const w = Math.max(150, sizeForLevel(level) * 1.15);
     const h = 230;
     const x = startX + gap * i + (gap - w) / 2;
     obstacles.push({
@@ -43,10 +46,27 @@ export function makeObstacles(level: number, world: World): Obstacle[] {
   return obstacles;
 }
 
+/**
+ * Erzeugt den nächsten Kackhaufen samt Bewegungsart. Die Objekte müssen
+ * vorher feststehen, damit er sich für das Versteckspiel hinter eines
+ * stellen kann.
+ */
+function nextPoop(
+  level: number,
+  world: World,
+  obstacles: Obstacle[],
+  rng: () => number,
+) {
+  const poop = spawnPoop(level, world, rng);
+  startMotion(poop, level, world, obstacles, rng);
+  return poop;
+}
+
 export function createGame(
   world: World,
   rng: () => number = Math.random,
 ): GameState {
+  const obstacles = makeObstacles(0, world);
   return {
     world,
     score: 0,
@@ -55,8 +75,8 @@ export function createGame(
     timeLeft: ROUND_TIME,
     combo: 0,
     bestCombo: 0,
-    poop: spawnPoop(0, world, rng),
-    obstacles: makeObstacles(0, world),
+    poop: nextPoop(0, world, obstacles, rng),
+    obstacles,
     falling: [],
     stars: [],
   };
@@ -133,13 +153,18 @@ export function handleTap(
   launchFallingPoop(state);
   burstStars(state);
   state.level += 1;
-  state.poop = spawnPoop(state.level, state.world, rng);
+  // Erst die Objekte, dann der Kackhaufen – er braucht sie zum Verstecken.
   state.obstacles = makeObstacles(state.level, state.world);
+  state.poop = nextPoop(state.level, state.world, state.obstacles, rng);
   return "hit";
 }
 
 /** Bewegt die Welt einen Zeitschritt weiter (Sekunden). */
-export function update(state: GameState, dt: number): void {
+export function update(
+  state: GameState,
+  dt: number,
+  rng: () => number = Math.random,
+): void {
   if (state.phase === "playing") {
     state.timeLeft -= dt;
     if (state.timeLeft <= 0) {
@@ -147,7 +172,14 @@ export function update(state: GameState, dt: number): void {
       state.phase = "gameover";
     }
     // Der Kackhaufen läuft nur während der Runde; nach Rundenende hält er an.
-    updatePoop(state.poop, dt, state.world);
+    updateMovement(
+      state.poop,
+      dt,
+      state.world,
+      state.obstacles,
+      state.level,
+      rng,
+    );
   }
 
   for (const f of state.falling) {

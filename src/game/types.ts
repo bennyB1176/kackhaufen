@@ -8,6 +8,15 @@ export interface World {
   height: number;
 }
 
+/**
+ * Art der Fortbewegung. Sorgt dafür, dass der Kackhaufen nicht immer nur
+ * stumpf von links nach rechts läuft.
+ */
+export type MoveMode = "walk" | "hop" | "dash" | "peek";
+
+/** Beim Versteckspiel: lugt er gerade hervor oder steckt er hinter dem Objekt? */
+export type PeekPhase = "out" | "hiding";
+
 export interface Poop {
   /** Mittelpunkt X in Spielkoordinaten */
   x: number;
@@ -24,6 +33,18 @@ export interface Poop {
    * Duftwölkchen)? Ein Treffer bringt dann Bonuspunkte.
    */
   captain: boolean;
+  /** Art der Fortbewegung */
+  mode: MoveMode;
+  /** Vertikale Geschwindigkeit in px/s (nur beim Hüpfen) */
+  vy: number;
+  /** Timer des aktuellen Bewegungsabschnitts in Sekunden (von allen Modi genutzt) */
+  timer: number;
+  /** Peek: Index des Hindernisses, hinter dem er sich versteckt (-1 = keins) */
+  anchor: number;
+  /** Peek: lugt er hervor oder ist er versteckt? */
+  peekPhase: PeekPhase;
+  /** Peek: auf welcher Seite des Hindernisses lugt er hervor (-1 links, 1 rechts) */
+  peekSide: number;
 }
 
 /** Art des Deko-/Versteck-Objekts, das gezeichnet wird. */

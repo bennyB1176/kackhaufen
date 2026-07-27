@@ -1,9 +1,12 @@
 import { describe, it, expect } from "vitest";
 import { isTapOnPoop, isPoopCovered } from "../src/game/collision";
+import { spawnPoop } from "../src/game/poop";
 import type { Poop, Obstacle } from "../src/game/types";
 
+/** Baut einen Kackhaufen an fester Position (nutzt den echten Spawn als Basis). */
 function poopAt(x: number, y: number, size = 180): Poop {
-  return { x, y, vx: 100, size, walk: 0, captain: false };
+  const p = spawnPoop(0, { width: 1280, height: 720 }, () => 0.2);
+  return { ...p, x, y, size, vx: 100 };
 }
 
 describe("collision", () => {
