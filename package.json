@@ -1,7 +1,7 @@
 {
-  "name": "kackhaufen",
+  "name": "captain-kacki",
   "version": "1.0.0",
-  "description": "Ein kindgerechtes 2D-Tap-Spiel: fang den laufenden Kackhaufen!",
+  "description": "Captain Kacki – ein kindgerechtes 2D-Tap-Spiel: fang den laufenden Kackhaufen!",
   "type": "module",
   "scripts": {
     "dev": "vite",

@@ -1,15 +1,21 @@
-# 💩 Kackhaufen fangen!
+# 💩🧢 Captain Kacki
 
 Ein kindgerechtes 2D-Handyspiel im **Querformat**: Ein Kackhaufen mit Augen und
 kleinen schwarzen Beinchen läuft über die Wiese. Tippe ihn an, bevor er entwischt!
 
 ## So wird gespielt
 
-- Der **Kackhaufen läuft von links nach rechts** (und wieder zurück).
+- Du hast **60 Sekunden** pro Runde – danach zählt dein Punktestand.
 - **Tippst du ihn an** → ein Punkt ⭐ und er fällt lustig um (mit Sound & Sternchen).
 - **Tippst du daneben** → ein Punkt weg. Hast du keine Punkte, passiert nichts.
-- **Jeder Treffer macht es schwerer**: Er wird **kleiner**, **schneller** und
-  **versteckt sich häufiger hinter Büschen, Kisten & Steinen**.
+- **Treffer in Folge** steigern einen **Multiplikator** (x2, x3 …); ein Fehltreffer
+  setzt ihn zurück.
+- **Captain Kacki** 🧢 – der seltene, extra stinkige Kapitän mit Mütze – bringt einen
+  dicken Bonus. Er ist der Namensgeber des Spiels.
+- **Jeder Treffer macht es schwerer**: Er wird **kleiner** und **schneller**.
+- Er läuft nicht nur stumpf geradeaus, sondern **hüpft**, **flitzt** in Etappen und
+  **lugt hinter Büschen, Steinen & Häusern hervor**, um gleich wieder zu verschwinden.
+- Am Rundenende trägst du dich mit **Namen in die Bestenliste** ein (lokal gespeichert).
 
 Am besten auf dem Handy im **Querformat** spielen. 📱🔄
 
@@ -26,14 +32,20 @@ Die **reine Spiellogik** (`src/game/`) ist strikt vom **Rendering, Input und Aud
 getrennt und vollständig unit-getestet:
 
 ```
+public/    Favicon (SVG) und Startbildschirm-Symbol (PNG)
 src/
-  game/    Spiellogik (pur, getestet): types, config, difficulty, poop, collision, scoring, engine
+  game/    Spiellogik (pur, getestet): types, config, difficulty, poop, movement,
+           collision, scoring, highscore, engine
   render/  Canvas-Zeichnen (Kackhaufen, Beinchen, Objekte, Punkte, Animationen)
   input/   Tap → Spielkoordinaten
   audio/   Soundeffekte per Web Audio
   main.ts  bindet alles zusammen (Render-Loop)
 tests/     Vitest-Tests zur Spiellogik
 ```
+
+> Hinweis: Der Repo-Name bleibt `kackhaufen` – daran hängen die Pages-URL
+> (`vite.config.ts` → `base`) und die gespeicherten Highscores (localStorage-Schlüssel
+> in `src/game/highscore.ts`). Nur der *Spielname* heißt „Captain Kacki".
 
 ## Entwicklung
 

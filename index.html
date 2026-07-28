@@ -7,15 +7,21 @@
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
     <meta name="theme-color" content="#8fd3ff" />
-    <title>Kackhaufen fangen! 💩</title>
+    <!-- Root-relativ angeben: Vite stellt den konfigurierten base-Pfad
+         (/kackhaufen/) automatisch voran – im Dev-Server wie im Build.
+         Mit %BASE_URL% würde der Pfad im Dev-Server doppelt gesetzt. -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <title>Captain Kacki 💩🧢</title>
   </head>
   <body>
     <canvas id="game"></canvas>
 
     <div id="start-screen">
-      <h1>Kackhaufen fangen!</h1>
+      <h1>Captain Kacki</h1>
       <p>Tippe den laufenden Kackhaufen an, so schnell du kannst! Du hast 60 Sekunden.</p>
-      <p>Treffer in Folge geben Extra-Punkte. Fang den stinkigen Kapitän 🧢 für einen dicken Bonus!</p>
+      <p>Treffer in Folge geben Extra-Punkte. Und fang <strong>Captain Kacki</strong> 🧢 –
+        den stinkigen Kapitän mit Mütze – für einen dicken Bonus!</p>
       <button id="start-button" type="button">Los geht's!</button>
       <p class="hint">Am besten im Querformat 🔄</p>
     </div>

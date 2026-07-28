@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <title>Captain Kacki</title>
+  <!--
+    Bewusst gröber als die Spielgrafik (src/render/renderer.ts): keine feinen
+    Glanzkanten, große Augen, kräftige Mütze – damit der Kapitän auch bei 16 px
+    noch als Kackhaufen mit Mütze erkennbar bleibt.
+  -->
+  <rect width="64" height="64" rx="14" fill="#8fd3ff"/>
+
+  <!-- Körper: drei gestapelte Blobs, nach oben schmaler -->
+  <ellipse cx="32" cy="52" rx="22" ry="9" fill="#5a3210"/>
+  <ellipse cx="32" cy="47" rx="21" ry="9" fill="#7a4a1e"/>
+  <ellipse cx="32" cy="38" rx="16" ry="8" fill="#7a4a1e"/>
+  <ellipse cx="32" cy="30" rx="11" ry="7" fill="#986a34"/>
+
+  <!-- Augen: groß und kontrastreich, tragen die Erkennbarkeit -->
+  <circle cx="26" cy="38" r="6" fill="#ffffff"/>
+  <circle cx="38" cy="38" r="6" fill="#ffffff"/>
+  <circle cx="27" cy="39" r="3" fill="#221100"/>
+  <circle cx="39" cy="39" r="3" fill="#221100"/>
+
+  <!-- Kapitänsmütze: Schirm, weiße Krone, marineblaues Band, goldener Stern -->
+  <ellipse cx="32" cy="25" rx="19" ry="3.5" fill="#1a1a2e"/>
+  <path d="M14 23 Q14 9 32 9 Q50 9 50 23 Z" fill="#ffffff"/>
+  <rect x="14" y="19" width="36" height="6" fill="#16233f"/>
+  <path d="M32 17.4 34 21 38 21.4 35 24 36 28 32 26 28 28 29 24 26 21.4 30 21 Z" fill="#ffd23f"/>
+</svg>
